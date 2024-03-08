@@ -12,7 +12,7 @@ def print_subprocess_stdout(process: "Popen") -> None:
         if not line:
             break
 
-        print(line.decode("utf-8").strip())
+        print(line.decode("utf-8", "ignore").strip())
 
 
 def create_stream_chunk(

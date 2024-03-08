@@ -159,23 +159,25 @@ class VinoChatConfig:
 
     name: str
     path: str
-    device: List[int]
+    device: List[str]
     port: int
     maxlen: int
     agent_type: str
     template: Optional[str]
     gen_config: Optional[str]
+    model_format: str = "openvino"
 
     @staticmethod
     def add_cli_args(parser: "ArgumentParser") -> None:
         parser.add_argument("--name", type=str)
         parser.add_argument("--path", type=str)
-        parser.add_argument("--device", type=str)
+        parser.add_argument("--device", type=str, nargs="+")
         parser.add_argument("--port", type=int)
         parser.add_argument("--maxlen", type=int, default=2048)
         parser.add_argument("--agent_type", type=str, choices=list_agents(), default="react")
         parser.add_argument("--template", type=str, default=None)
         parser.add_argument("--gen_config", type=str, default=None)
+        parser.add_argument("--model_format", type=str, default="openvino")
 
     @classmethod
     def from_cli_args(cls, args: "Namespace") -> Self:
@@ -206,7 +208,7 @@ class VinoChatModel:
                      "NUM_STREAMS": "1", "CACHE_DIR": ""}
         self._engine = OVCHATGLMModel.from_pretrained(
             self.config.path,
-            device=self.config.device,
+            device=self.config.device[0],
             ov_config=ov_config,
             config=AutoConfig.from_pretrained(self.config.path, trust_remote_code=True),
             trust_remote_code=True,

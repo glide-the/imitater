@@ -34,7 +34,7 @@ class EmbedConfig:
     def add_cli_args(parser: "ArgumentParser") -> None:
         parser.add_argument("--name", type=str, required=True)
         parser.add_argument("--path", type=str, required=True)
-        parser.add_argument("--device", type=int, nargs="+", required=True)
+        parser.add_argument("--device", type=int, nargs="+")
         parser.add_argument("--port", type=int, required=True)
         parser.add_argument("--batch_size", type=int, default=64)
 
@@ -61,13 +61,13 @@ class EmbedModel:
         self._init_infinity_engine()
 
     def _init_infinity_engine(self) -> None:
-        if len(self.config.device) != 1:
+        if self.config.device and len(self.config.device) != 1:
             raise ValueError("Embedding model only accepts one device.")
 
         self._engine = AsyncEmbeddingEngine(
             model_name_or_path=self.config.path,
             batch_size=self.config.batch_size,
-            device="cuda",
+            device="cpu",
         )
 
     async def startup(self) -> None:

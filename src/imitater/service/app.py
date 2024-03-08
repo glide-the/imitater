@@ -142,6 +142,21 @@ def _launch_chat_server(chat_config: Dict[str, Any]) -> "Popen":
     return Popen(cmd, env=env, shell=True, stdout=PIPE, stderr=STDOUT)
 
 
+def _launch_vino_chat_server(chat_config: Dict[str, Any]) -> "Popen":
+    cmd = "python -m imitater.service.vino_chat"
+    cmd += " --name {}".format(chat_config["name"])
+    cmd += " --path {}".format(chat_config["path"])
+    cmd += " --device {}".format(" ".join(map(str, chat_config["device"])))
+    cmd += " --port {}".format(chat_config["port"])
+    cmd += " --maxlen {}".format(chat_config["maxlen"]) if "maxlen" in chat_config else ""
+    cmd += " --agent_type {}".format(chat_config["agent_type"]) if "agent_type" in chat_config else ""
+    cmd += " --template {}".format(chat_config["template"]) if "template" in chat_config else ""
+    cmd += " --gen_config {}".format(chat_config["gen_config"]) if "gen_config" in chat_config else ""
+    env = deepcopy(os.environ)
+
+    return Popen(cmd, env=env, shell=True, stdout=PIPE, stderr=STDOUT)
+
+
 def _launch_embed_server(embed_config: Dict[str, Any]) -> "Popen":
     cmd = "python -m imitater.service.embed"
     cmd += " --name {}".format(embed_config["name"])
@@ -167,7 +182,10 @@ def launch_server(config_file: str) -> None:
         if "token" in chat_config:
             chat_models[chat_config["name"]] = AsyncOpenAI(api_key=chat_config["token"])
         else:
-            processes.append(_launch_chat_server(chat_config))
+            # if chat_config["model_format"] == "openvino":
+            #     processes.append(_launch_vino_chat_server(chat_config))
+            # else:
+            #     processes.append(_launch_chat_server(chat_config))
             chat_models[chat_config["name"]] = AsyncOpenAI(
                 api_key="0", base_url="http://localhost:{}/v1".format(chat_config["port"])
             )
@@ -176,7 +194,7 @@ def launch_server(config_file: str) -> None:
         if "token" in embed_config:
             embed_models[embed_config["name"]] = AsyncOpenAI(api_key=embed_config["token"])
         else:
-            processes.append(_launch_embed_server(embed_config))
+            # processes.append(_launch_embed_server(embed_config))
             embed_models[embed_config["name"]] = AsyncOpenAI(
                 api_key="0", base_url="http://localhost:{}/v1".format(embed_config["port"])
             )
